@@ -206,9 +206,11 @@ class CriterionRTExtension {
     const rating = {
       tomatometer: rtRating ? rtRating.Value : null,
       imdbRating: data.imdbRating !== 'N/A' ? data.imdbRating : null,
+      imdbID: data.imdbID || null,
       year: data.Year,
       title: data.Title,
-      rtUrl: this.createRottenTomatoesUrl(data.Title, data.Year)
+      rtUrl: this.createRottenTomatoesUrl(data.Title, data.Year),
+      imdbUrl: data.imdbID ? `https://www.imdb.com/title/${data.imdbID}/` : null
     };
 
     // Cache the result
@@ -222,21 +224,41 @@ class CriterionRTExtension {
       const percentage = parseInt(rating.tomatometer);
       const tomatoIcon = percentage >= 60 ? '🍅' : '🤢';
 
+      // Build IMDb rating HTML (with or without link)
+      let imdbHtml = '';
+      if (rating.imdbRating) {
+        if (rating.imdbUrl) {
+          imdbHtml = `<a href="${rating.imdbUrl}" target="_blank" rel="noopener noreferrer" class="imdb-link" title="View on IMDb"><span class="imdb-score">IMDb: ${rating.imdbRating}/10</span></a>`;
+        } else {
+          imdbHtml = `<span class="imdb-score">IMDb: ${rating.imdbRating}/10</span>`;
+        }
+      }
+
       container.innerHTML = `
         <div class="rt-rating-content">
           <a href="${rating.rtUrl}" target="_blank" rel="noopener noreferrer" class="rt-link" title="View on Rotten Tomatoes">
             <span class="rt-icon">${tomatoIcon}</span>
             <span class="rt-score">${rating.tomatometer}</span>
           </a>
-          ${rating.imdbRating ? `<span class="imdb-score">IMDb: ${rating.imdbRating}/10</span>` : ''}
+          ${imdbHtml}
         </div>
       `;
     } else if (rating.imdbRating) {
-      container.innerHTML = `
-        <div class="rt-rating-content">
-          <span class="imdb-score">IMDb: ${rating.imdbRating}/10</span>
-        </div>
-      `;
+      if (rating.imdbUrl) {
+        container.innerHTML = `
+          <div class="rt-rating-content">
+            <a href="${rating.imdbUrl}" target="_blank" rel="noopener noreferrer" class="imdb-link" title="View on IMDb">
+              <span class="imdb-score">IMDb: ${rating.imdbRating}/10</span>
+            </a>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="rt-rating-content">
+            <span class="imdb-score">IMDb: ${rating.imdbRating}/10</span>
+          </div>
+        `;
+      }
     } else {
       container.innerHTML = '<span class="rt-na">No rating available</span>';
     }

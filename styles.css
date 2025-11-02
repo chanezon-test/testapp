@@ -40,6 +40,23 @@
   transform: translateY(0);
 }
 
+.imdb-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.imdb-link:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.imdb-link:active {
+  transform: translateY(0);
+}
+
 .rt-score {
   font-weight: 600;
   color: #fa320a;
