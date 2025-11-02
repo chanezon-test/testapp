@@ -22,6 +22,24 @@
   line-height: 1;
 }
 
+.rt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.rt-link:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.rt-link:active {
+  transform: translateY(0);
+}
+
 .rt-score {
   font-weight: 600;
   color: #fa320a;

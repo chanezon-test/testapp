@@ -5,6 +5,7 @@ A Microsoft Edge browser extension that adds Rotten Tomatoes ratings to movies o
 ## Features
 
 - **Automatic Rating Display**: Displays Rotten Tomatoes ratings (Tomatometer) under each movie on Criterion Collection listing pages
+- **Clickable Links**: Ratings link directly to the Rotten Tomatoes page for each movie - click to read reviews!
 - **IMDb Ratings**: Also shows IMDb ratings when available
 - **Visual Indicators**: Shows tomato or splat emoji based on rating (Fresh: 🍅 60%+, Rotten: 🤢 <60%)
 - **Site-Specific**: Only runs on https://www.criterionchannel.com/*, ensuring no interference with other websites
