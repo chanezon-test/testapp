@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criterion RT Extension - Options</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    h1 {
+      color: #333;
+      border-bottom: 2px solid #fa320a;
+      padding-bottom: 10px;
+    }
+
+    .info-box {
+      background-color: #f0f7ff;
+      border-left: 4px solid #0066cc;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .form-group {
+      margin: 20px 0;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #fa320a;
+    }
+
+    button {
+      background-color: #fa320a;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #d62a08;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .success {
+      color: #28a745;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .error {
+      color: #dc3545;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .instructions {
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .instructions ol {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin: 8px 0;
+    }
+
+    a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>🍅 Criterion Collection Rotten Tomatoes Extension</h1>
+
+  <div class="info-box">
+    <strong>About this extension:</strong>
+    <p>This extension adds Rotten Tomatoes ratings to movies on the Criterion Collection website, helping you discover highly-rated films.</p>
+  </div>
+
+  <div class="instructions">
+    <strong>🔑 API Key Setup Instructions:</strong>
+    <ol>
+      <li>Visit <a href="https://www.omdbapi.com/apikey.aspx" target="_blank">OMDB API website</a></li>
+      <li>Select the FREE plan (1,000 requests per day)</li>
+      <li>Enter your email address</li>
+      <li>Check your email for the API key activation link</li>
+      <li>Click the activation link in the email</li>
+      <li>Copy your API key and paste it below</li>
+    </ol>
+  </div>
+
+  <div class="form-group">
+    <label for="apiKey">OMDB API Key:</label>
+    <input type="text" id="apiKey" placeholder="Enter your OMDB API key here">
+  </div>
+
+  <button id="saveBtn">Save Settings</button>
+  <div id="status"></div>
+
+  <script src="options.js"></script>
+</body>
+</html>
