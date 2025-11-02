@@ -171,6 +171,20 @@ class CriterionRTExtension {
     return candidates.find(el => el !== null) || element;
   }
 
+  createRottenTomatoesUrl(title, year) {
+    // Convert movie title to Rotten Tomatoes URL format
+    // Example: "The Grand Budapest Hotel" -> "the_grand_budapest_hotel"
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+      .replace(/\s+/g, '_') // Replace spaces with underscores
+      .replace(/^the_/, '') // Remove leading "the_"
+      .replace(/_+/g, '_') // Remove duplicate underscores
+      .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
+
+    return `https://www.rottentomatoes.com/m/${slug}`;
+  }
+
   async fetchRating(title) {
     // Check cache first
     if (this.cache.has(title)) {
@@ -192,8 +206,11 @@ class CriterionRTExtension {
     const rating = {
       tomatometer: rtRating ? rtRating.Value : null,
       imdbRating: data.imdbRating !== 'N/A' ? data.imdbRating : null,
+      imdbID: data.imdbID || null,
       year: data.Year,
-      title: data.Title
+      title: data.Title,
+      rtUrl: this.createRottenTomatoesUrl(data.Title, data.Year),
+      imdbUrl: data.imdbID ? `https://www.imdb.com/title/${data.imdbID}/` : null
     };
 
     // Cache the result
@@ -207,19 +224,41 @@ class CriterionRTExtension {
       const percentage = parseInt(rating.tomatometer);
       const tomatoIcon = percentage >= 60 ? '🍅' : '🤢';
 
+      // Build IMDb rating HTML (with or without link)
+      let imdbHtml = '';
+      if (rating.imdbRating) {
+        if (rating.imdbUrl) {
+          imdbHtml = `<a href="${rating.imdbUrl}" target="_blank" rel="noopener noreferrer" class="imdb-link" title="View on IMDb"><span class="imdb-score">IMDb: ${rating.imdbRating}/10</span></a>`;
+        } else {
+          imdbHtml = `<span class="imdb-score">IMDb: ${rating.imdbRating}/10</span>`;
+        }
+      }
+
       container.innerHTML = `
         <div class="rt-rating-content">
-          <span class="rt-icon">${tomatoIcon}</span>
-          <span class="rt-score">${rating.tomatometer}</span>
-          ${rating.imdbRating ? `<span class="imdb-score">IMDb: ${rating.imdbRating}/10</span>` : ''}
+          <a href="${rating.rtUrl}" target="_blank" rel="noopener noreferrer" class="rt-link" title="View on Rotten Tomatoes">
+            <span class="rt-icon">${tomatoIcon}</span>
+            <span class="rt-score">${rating.tomatometer}</span>
+          </a>
+          ${imdbHtml}
         </div>
       `;
     } else if (rating.imdbRating) {
-      container.innerHTML = `
-        <div class="rt-rating-content">
-          <span class="imdb-score">IMDb: ${rating.imdbRating}/10</span>
-        </div>
-      `;
+      if (rating.imdbUrl) {
+        container.innerHTML = `
+          <div class="rt-rating-content">
+            <a href="${rating.imdbUrl}" target="_blank" rel="noopener noreferrer" class="imdb-link" title="View on IMDb">
+              <span class="imdb-score">IMDb: ${rating.imdbRating}/10</span>
+            </a>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="rt-rating-content">
+            <span class="imdb-score">IMDb: ${rating.imdbRating}/10</span>
+          </div>
+        `;
+      }
     } else {
       container.innerHTML = '<span class="rt-na">No rating available</span>';
     }
