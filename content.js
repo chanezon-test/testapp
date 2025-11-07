@@ -1,11 +1,22 @@
-// Criterion Collection Rotten Tomatoes Extension - Content Script
+// Movie Ratings Extension for Criterion Collection and Kanopy - Content Script
 
-class CriterionRTExtension {
+class MovieRatingsExtension {
   constructor() {
     this.apiKey = null;
     this.cache = new Map();
     this.observer = null;
+    this.currentSite = this.detectSite();
     this.init();
+  }
+
+  detectSite() {
+    const hostname = window.location.hostname;
+    if (hostname.includes('criterionchannel.com')) {
+      return 'criterion';
+    } else if (hostname.includes('kanopy.com')) {
+      return 'kanopy';
+    }
+    return 'unknown';
   }
 
   async init() {
@@ -13,9 +24,11 @@ class CriterionRTExtension {
     this.apiKey = await this.getApiKey();
 
     if (!this.apiKey) {
-      console.log('Criterion RT Extension: No OMDB API key configured. Please set one in the extension options.');
+      console.log('Movie Ratings Extension: No OMDB API key configured. Please set one in the extension options.');
       return;
     }
+
+    console.log(`Movie Ratings Extension: Running on ${this.currentSite}`);
 
     // Process existing movies
     this.processMovies();
@@ -56,14 +69,26 @@ class CriterionRTExtension {
   }
 
   findMovieElements() {
-    // Criterion Collection specific selectors
-    const selectors = [
-      // Main movie list items
-      'li.js-collection-item.item-type-video',
-      // Fallback to broader selectors
-      '.js-collection-item',
-      '.browse-item-card'
-    ];
+    let selectors = [];
+
+    if (this.currentSite === 'criterion') {
+      // Criterion Collection specific selectors
+      selectors = [
+        'li.js-collection-item.item-type-video',
+        '.js-collection-item',
+        '.browse-item-card'
+      ];
+    } else if (this.currentSite === 'kanopy') {
+      // Kanopy specific selectors
+      selectors = [
+        'a[href*="/product/"]',  // Kanopy product links
+        'div[class*="film"]',
+        'div[class*="movie"]',
+        'div[class*="video-card"]',
+        'article',
+        '.card'
+      ];
+    }
 
     let movieElements = [];
 
@@ -80,21 +105,50 @@ class CriterionRTExtension {
   }
 
   extractMovieTitle(element) {
-    // Criterion Collection specific title extraction
+    let title = null;
 
-    // Look for the title in the browse-item-title class
-    const titleEl = element.querySelector('.browse-item-title strong');
-    if (titleEl && titleEl.textContent.trim()) {
-      return this.cleanTitle(titleEl.textContent);
+    if (this.currentSite === 'criterion') {
+      // Criterion Collection specific title extraction
+      const titleEl = element.querySelector('.browse-item-title strong');
+      if (titleEl && titleEl.textContent.trim()) {
+        return this.cleanTitle(titleEl.textContent);
+      }
+    } else if (this.currentSite === 'kanopy') {
+      // Kanopy specific title extraction
+
+      // Try various selectors commonly used on Kanopy
+      const selectors = [
+        'h3',
+        'h4',
+        '[class*="title"]',
+        '[class*="name"]',
+        '[aria-label]'
+      ];
+
+      for (const selector of selectors) {
+        const titleEl = element.querySelector(selector);
+        if (titleEl && titleEl.textContent.trim()) {
+          title = this.cleanTitle(titleEl.textContent);
+          if (title) return title;
+        }
+      }
+
+      // Check aria-label on the element itself
+      const ariaLabel = element.getAttribute('aria-label');
+      if (ariaLabel && ariaLabel.trim()) {
+        return this.cleanTitle(ariaLabel);
+      }
     }
 
-    // Fallback: check title attribute on images
+    // Universal fallbacks for both sites
+
+    // Check image alt text
     const img = element.querySelector('img[alt]');
     if (img && img.alt && img.alt.trim()) {
       return this.cleanTitle(img.alt);
     }
 
-    // Fallback: check data attributes
+    // Check data attributes
     const dataTitle = element.getAttribute('data-title') ||
                      element.getAttribute('data-film-title') ||
                      element.getAttribute('data-movie-title');
@@ -161,12 +215,25 @@ class CriterionRTExtension {
 
   findInsertionPoint(element) {
     // Try to find a good place to insert the rating
-    // For Criterion Collection, insert in the padding-small div after the title
-    const candidates = [
-      element.querySelector('.padding-small'),
-      element.querySelector('.browse-item-title'),
-      element.querySelector('.grid-item-padding')
-    ];
+    let candidates = [];
+
+    if (this.currentSite === 'criterion') {
+      // Criterion Collection specific insertion points
+      candidates = [
+        element.querySelector('.padding-small'),
+        element.querySelector('.browse-item-title'),
+        element.querySelector('.grid-item-padding')
+      ];
+    } else if (this.currentSite === 'kanopy') {
+      // Kanopy specific insertion points
+      candidates = [
+        element.querySelector('[class*="info"]'),
+        element.querySelector('[class*="meta"]'),
+        element.querySelector('[class*="details"]'),
+        element.querySelector('[class*="content"]'),
+        element.querySelector('div')
+      ];
+    }
 
     return candidates.find(el => el !== null) || element;
   }
@@ -268,8 +335,8 @@ class CriterionRTExtension {
 // Initialize the extension when the page loads
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    new CriterionRTExtension();
+    new MovieRatingsExtension();
   });
 } else {
-  new CriterionRTExtension();
+  new MovieRatingsExtension();
 }
