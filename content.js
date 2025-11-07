@@ -159,11 +159,21 @@ class MovieRatingsExtension {
 
   cleanTitle(title) {
     // Remove extra whitespace, year info in parentheses, etc.
-    return title
+    let cleaned = title
       .trim()
       .replace(/\s+/g, ' ')
-      .replace(/\(\d{4}\)/, '') // Remove year
-      .trim();
+      .replace(/\(\d{4}\)/, ''); // Remove year
+
+    // For titles with " - " separator (common on Kanopy with dual language titles)
+    // Take only the first part (usually English title)
+    // Example: "The Romance of Astrea and Celadon - Les amours d'Astrée et de Céladon"
+    // becomes: "The Romance of Astrea and Celadon"
+    if (cleaned.includes(' - ')) {
+      const parts = cleaned.split(' - ');
+      cleaned = parts[0];
+    }
+
+    return cleaned.trim();
   }
 
   async processMovies() {
